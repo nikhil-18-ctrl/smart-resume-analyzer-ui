@@ -8,7 +8,6 @@ const UploadCard = () => {
   const [resume, setResume] = useState(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
-  const [structured, setStructured] = useState(null);
 
   /* =======================
      ANALYZE RESUME
@@ -25,7 +24,6 @@ const UploadCard = () => {
 
     setLoading(true);
     setResult(null);
-    setStructured(null);
 
     try {
       const res = await fetch(`${API_BASE}/api/upload`, {
@@ -33,41 +31,15 @@ const UploadCard = () => {
         body: formData,
       });
 
-      if (!res.ok) throw new Error("API failed");
+      if (!res.ok) {
+        throw new Error("API request failed");
+      }
 
       const data = await res.json();
       setResult(data);
-    } catch (err) {
-      alert("Backend not reachable. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /* =======================
-     STRUCTURED RESUME
-  ======================= */
-  const handleStructured = async () => {
-    if (!resume || !jd.trim()) return;
-
-    const formData = new FormData();
-    formData.append("resume", resume);
-    formData.append("jd", jd);
-
-    setLoading(true);
-
-    try {
-      const res = await fetch(`${API_BASE}/api/structured-resume`, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!res.ok) throw new Error("API failed");
-
-      const data = await res.json();
-      setStructured(data);
-    } catch (err) {
-      alert("Failed to generate structured resume.");
+    } catch (error) {
+      alert("Backend not reachable. Please try again in a few seconds.");
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -91,70 +63,55 @@ const UploadCard = () => {
         />
 
         {/* FILE UPLOAD */}
-        <div className="file-box">
-          <label className="label">📎 Resume Upload (PDF / DOCX)</label>
-          <input
-            type="file"
-            accept=".pdf,.docx"
-            onChange={(e) => setResume(e.target.files[0])}
-          />
-        </div>
+        <label className="label">📎 Resume Upload (PDF / DOCX)</label>
+        <input
+          type="file"
+          accept=".pdf,.docx"
+          onChange={(e) => setResume(e.target.files[0])}
+        />
 
-        {/* ACTION BUTTONS */}
-        <div className="actions">
-          <button
-            className="btn analyze"
-            onClick={handleAnalyze}
-            disabled={loading}
-          >
-            {loading ? "Analyzing..." : "Analyze Resume"}
-          </button>
-
-          {result && (
-            <button
-              className="btn optimize"
-              onClick={handleStructured}
-              disabled={loading}
-            >
-              {loading ? "Generating..." : "Generate Structured Resume"}
-            </button>
-          )}
-        </div>
+        {/* ACTION BUTTON */}
+        <button
+          className="btn analyze"
+          onClick={handleAnalyze}
+          disabled={loading}
+        >
+          {loading ? "Analyzing..." : "Analyze Resume"}
+        </button>
 
         {/* =======================
-            ANALYSIS RESULT
+            RESULTS
         ======================= */}
         {result && (
           <div className="result">
-            <div className="score">ATS Score: {result.ats_score}%</div>
+            <div className="score">
+              ATS Score: {result.ats_score}%
+            </div>
 
-            <ResultGroup title="Matched Skills" items={result.matched_skills} type="matched" />
+            <ResultGroup
+              title="Matched Skills"
+              items={result.matched_skills}
+              type="matched"
+            />
+
             <ResultGroup
               title="Missing Skills"
               items={result.missing_skills}
               type="missing"
               emptyText="No missing skills 🎉"
             />
-            <ResultGroup title="Matched Keywords" items={result.matched_keywords} type="keyword" />
-            <ResultGroup title="Missing Keywords" items={result.missing_keywords} type="missing" />
-          </div>
-        )}
 
-        {/* =======================
-            STRUCTURED RESUME
-        ======================= */}
-        {structured && (
-          <div className="result">
-            <div className="score">
-              ATS Improvement: {structured.ats_score_before}% →{" "}
-              {structured.ats_score_after}%
-            </div>
+            <ResultGroup
+              title="Matched Keywords"
+              items={result.matched_keywords}
+              type="keyword"
+            />
 
-            <textarea readOnly value={structured.structured_resume} />
-
-            <p className="subtitle" style={{ marginTop: "12px" }}>
-              ⚠️ No fake skills added. Resume was ethically rephrased and structured.
-            </p>
+            <ResultGroup
+              title="Missing Keywords"
+              items={result.missing_keywords}
+              type="missing"
+            />
           </div>
         )}
 
@@ -168,7 +125,7 @@ const UploadCard = () => {
 };
 
 /* =======================
-   REUSABLE RESULT GROUP
+   RESULT GROUP COMPONENT
 ======================= */
 const ResultGroup = ({ title, items, type, emptyText }) => {
   if (!items || items.length === 0) {
@@ -186,8 +143,8 @@ const ResultGroup = ({ title, items, type, emptyText }) => {
     <div className="tag-group">
       <div className="tag-title">{title}</div>
       <div className="tags">
-        {items.map((item, i) => (
-          <span key={i} className={`tag ${type}`}>
+        {items.map((item, index) => (
+          <span key={index} className={`tag ${type}`}>
             {item}
           </span>
         ))}
