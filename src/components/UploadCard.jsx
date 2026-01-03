@@ -1,19 +1,21 @@
 import { useState } from "react";
 import "./UploadCard.css";
 
+const API_BASE = "https://smart-resume-analyzer-backend-gmcl.onrender.com";
+
 const UploadCard = () => {
   const [jd, setJd] = useState("");
   const [resume, setResume] = useState(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
-  const [optimized, setOptimized] = useState(null);
+  const [structured, setStructured] = useState(null);
 
   /* =======================
      ANALYZE RESUME
   ======================= */
   const handleAnalyze = async () => {
     if (!resume || !jd.trim()) {
-      alert("Please upload resume and paste the job description.");
+      alert("Please upload a resume and paste the job description.");
       return;
     }
 
@@ -23,27 +25,29 @@ const UploadCard = () => {
 
     setLoading(true);
     setResult(null);
-    setOptimized(null);
+    setStructured(null);
 
     try {
-      const res = await fetch("http://127.0.0.1:5000/api/upload", {
+      const res = await fetch(`${API_BASE}/api/upload`, {
         method: "POST",
         body: formData,
       });
 
+      if (!res.ok) throw new Error("API failed");
+
       const data = await res.json();
       setResult(data);
     } catch (err) {
-      alert("Backend not reachable. Is Flask running?");
+      alert("Backend not reachable. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   /* =======================
-     OPTIMIZE RESUME
+     STRUCTURED RESUME
   ======================= */
-  const handleOptimize = async () => {
+  const handleStructured = async () => {
     if (!resume || !jd.trim()) return;
 
     const formData = new FormData();
@@ -53,18 +57,17 @@ const UploadCard = () => {
     setLoading(true);
 
     try {
-      const res = await fetch(
-        "http://127.0.0.1:5000/api/optimize-resume",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const res = await fetch(`${API_BASE}/api/structured-resume`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("API failed");
 
       const data = await res.json();
-      setOptimized(data);
+      setStructured(data);
     } catch (err) {
-      alert("Failed to optimize resume.");
+      alert("Failed to generate structured resume.");
     } finally {
       setLoading(false);
     }
@@ -107,6 +110,15 @@ const UploadCard = () => {
             {loading ? "Analyzing..." : "Analyze Resume"}
           </button>
 
+          {result && (
+            <button
+              className="btn optimize"
+              onClick={handleStructured}
+              disabled={loading}
+            >
+              {loading ? "Generating..." : "Generate Structured Resume"}
+            </button>
+          )}
         </div>
 
         {/* =======================
@@ -114,51 +126,34 @@ const UploadCard = () => {
         ======================= */}
         {result && (
           <div className="result">
-            <div className="score">
-              ATS Score: {result.ats_score}%
-            </div>
+            <div className="score">ATS Score: {result.ats_score}%</div>
 
-            <ResultGroup
-              title="Matched Skills"
-              items={result.matched_skills}
-              type="matched"
-            />
-
+            <ResultGroup title="Matched Skills" items={result.matched_skills} type="matched" />
             <ResultGroup
               title="Missing Skills"
               items={result.missing_skills}
               type="missing"
               emptyText="No missing skills 🎉"
             />
-
-            <ResultGroup
-              title="Matched Keywords"
-              items={result.matched_keywords}
-              type="keyword"
-            />
-
-            <ResultGroup
-              title="Missing Keywords"
-              items={result.missing_keywords}
-              type="missing"
-            />
+            <ResultGroup title="Matched Keywords" items={result.matched_keywords} type="keyword" />
+            <ResultGroup title="Missing Keywords" items={result.missing_keywords} type="missing" />
           </div>
         )}
 
         {/* =======================
-            OPTIMIZED RESUME
+            STRUCTURED RESUME
         ======================= */}
-        {optimized && (
+        {structured && (
           <div className="result">
             <div className="score">
-              ATS Improvement: {optimized.ats_score_before}% →{" "}
-              {optimized.ats_score_after}%
+              ATS Improvement: {structured.ats_score_before}% →{" "}
+              {structured.ats_score_after}%
             </div>
 
-            <textarea readOnly value={optimized.optimized_resume_text} />
+            <textarea readOnly value={structured.structured_resume} />
 
             <p className="subtitle" style={{ marginTop: "12px" }}>
-              ⚠️ Skills were not modified. Only keywords were improved.
+              ⚠️ No fake skills added. Resume was ethically rephrased and structured.
             </p>
           </div>
         )}
