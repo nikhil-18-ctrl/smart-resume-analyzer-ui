@@ -1,0 +1,96 @@
+.right-panel {
+  position: relative;
+  flex: 1;
+  min-height: 100vh;
+  overflow: hidden;
+  background: radial-gradient(
+    circle at top right,
+    rgba(80, 120, 255, 0.15),
+    transparent 60%
+  );
+}
+
+/* ---------- Ambient Blobs ---------- */
+.blob {
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+  animation: float 12s infinite ease-in-out;
+}
+
+.blob-1 {
+  background: #3b82f6;
+  top: 20%;
+  left: 10%;
+}
+
+.blob-2 {
+  background: #22c55e;
+  bottom: 15%;
+  right: 15%;
+  animation-delay: 4s;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-30px) translateX(20px);
+  }
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+}
+
+/* ---------- Glass ATS Card ---------- */
+.ats-info-card {
+  position: relative;
+  margin: 120px auto;
+  width: 75%;
+  padding: 28px;
+  border-radius: 20px;
+
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+
+  color: #e5e7eb;
+}
+
+.ats-info-card h3 {
+  font-size: 20px;
+  margin-bottom: 16px;
+  color: #ffffff;
+}
+
+.ats-info-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.ats-info-card li {
+  margin-bottom: 10px;
+  font-size: 15px;
+  opacity: 0.9;
+}
+
+.note {
+  margin-top: 18px;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+/* ---------- Hide on Mobile ---------- */
+@media (max-width: 900px) {
+  .right-panel {
+    display: none;
+  }
+}

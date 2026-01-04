@@ -40,3 +40,37 @@
 .read-the-docs {
   color: #888;
 }
+
+/* ================================
+   MAIN APP LAYOUT
+================================ */
+
+.app-layout {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 48px;
+  padding: 60px;
+  background: radial-gradient(
+    circle at top,
+    #0f172a,
+    #020617 70%
+  );
+}
+
+/* Center main card vertically */
+.app-layout > :first-child {
+  align-self: center;
+}
+
+/* ================================
+   RESPONSIVE (MOBILE)
+================================ */
+
+@media (max-width: 1024px) {
+  .app-layout {
+    grid-template-columns: 1fr;
+    padding: 32px;
+  }
+}
+
