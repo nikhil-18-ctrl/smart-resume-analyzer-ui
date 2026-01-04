@@ -11,19 +11,36 @@
 }
 
 /* ===== CARD ===== */
+/* =========================
+   MAIN GLASS CARD (FAT 🔥)
+========================= */
+
 .card {
   width: 100%;
-  max-width: 900px;
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(18px);
-  border-radius: 20px;
-  padding: 32px;
-  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.6);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  max-width: 1050px;        /* ⬅️ INCREASED fatness */
+  padding: 48px 52px;       /* ⬅️ thicker inside */
+  
+  background: rgba(15, 23, 42, 0.78);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+
+  border-radius: 28px;      /* ⬅️ smoother premium curves */
+
+  box-shadow:
+    0 40px 120px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease;
 }
 
+/* Premium hover */
 .card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow:
+    0 55px 160px rgba(0, 0, 0, 0.75),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 /* ===== HEADER ===== */
@@ -236,3 +253,12 @@ input[type="file"] {
   color: #64748b;
   margin-top: 22px;
 }
+
+@media (max-width: 768px) {
+  .card {
+    padding: 32px 24px;
+    max-width: 100%;
+    border-radius: 22px;
+  }
+}
+
