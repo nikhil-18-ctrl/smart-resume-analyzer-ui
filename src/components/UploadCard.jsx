@@ -1,19 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./UploadCard.css";
 
 const API_BASE = "https://smart-resume-analyzer-backend-gmcl.onrender.com";
+
+/* =======================
+   SCORE COLOR HELPER
+======================= */
 const getScoreColor = (score) => {
   if (score < 50) return "red";
   if (score < 65) return "yellow";
   return "green";
 };
 
-
 const UploadCard = () => {
   const [jd, setJd] = useState("");
   const [resume, setResume] = useState(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [displayScore, setDisplayScore] = useState(0);
 
   /* =======================
      ANALYZE RESUME
@@ -30,6 +34,7 @@ const UploadCard = () => {
 
     setLoading(true);
     setResult(null);
+    setDisplayScore(0);
 
     try {
       const res = await fetch(`${API_BASE}/api/upload`, {
@@ -44,12 +49,36 @@ const UploadCard = () => {
       const data = await res.json();
       setResult(data);
     } catch (error) {
-      alert("Backend not reachable. Please try again in a few seconds.");
+      alert("Backend not reachable. Please wait and try again.");
       console.error(error);
     } finally {
       setLoading(false);
     }
   };
+
+  /* =======================
+     ANIMATED SCORE COUNT-UP
+  ======================= */
+  useEffect(() => {
+    if (!result) return;
+
+    let start = 0;
+    const end = result.ats_score;
+    const duration = 800; // animation duration (ms)
+    const stepTime = Math.max(Math.floor(duration / end), 15);
+
+    const timer = setInterval(() => {
+      start += 1;
+      setDisplayScore(start);
+
+      if (start >= end) {
+        clearInterval(timer);
+        setDisplayScore(end);
+      }
+    }, stepTime);
+
+    return () => clearInterval(timer);
+  }, [result]);
 
   return (
     <div className="page">
@@ -83,14 +112,13 @@ const UploadCard = () => {
           disabled={loading}
         >
           {loading ? (
-  <span className="loading-text">
-    <span className="loader"></span>
-    Waking up server… analyzing resume
-  </span>
-) : (
-  "Analyze Resume"
-)}
-
+            <span className="loading-text">
+              <span className="loader"></span>
+              Waking up server… analyzing resume
+            </span>
+          ) : (
+            "Analyze Resume"
+          )}
         </button>
 
         {/* =======================
@@ -98,24 +126,25 @@ const UploadCard = () => {
         ======================= */}
         {result && (
           <div className="result">
+            {/* SCORE SECTION */}
             <div className="score-section">
-  <div className={`score-text ${getScoreColor(result.ats_score)}`}>
-    ATS Score: {result.ats_score}%
-  </div>
+              <div className={`score-text ${getScoreColor(displayScore)}`}>
+                ATS Score: {displayScore}%
+              </div>
 
-  <div className="progress-bar">
-    <div
-      className={`progress-fill ${getScoreColor(result.ats_score)}`}
-      style={{ width: `${result.ats_score}%` }}
-    ></div>
-  </div>
+              <div className="progress-bar">
+                <div
+                  className={`progress-fill ${getScoreColor(displayScore)}`}
+                  style={{ width: `${displayScore}%` }}
+                ></div>
+              </div>
 
-  <div className="score-hint">
-    Target score for high acceptance: <strong>65%+</strong>
-  </div>
-</div>
+              <div className="score-hint">
+                Target score for high acceptance: <strong>65%+</strong>
+              </div>
+            </div>
 
-
+            {/* SKILLS & KEYWORDS */}
             <ResultGroup
               title="Matched Skills"
               items={result.matched_skills}
@@ -145,7 +174,7 @@ const UploadCard = () => {
 
         {/* FOOTER */}
         <div className="footer">
-          Smart Resume Analyzer • React + Flask
+  Smart Resume Analyzer — Built by <strong>Nikhil Geedi</strong>
         </div>
       </div>
     </div>
