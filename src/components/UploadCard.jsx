@@ -2,6 +2,12 @@ import { useState } from "react";
 import "./UploadCard.css";
 
 const API_BASE = "https://smart-resume-analyzer-backend-gmcl.onrender.com";
+const getScoreColor = (score) => {
+  if (score < 50) return "red";
+  if (score < 65) return "yellow";
+  return "green";
+};
+
 
 const UploadCard = () => {
   const [jd, setJd] = useState("");
@@ -76,7 +82,15 @@ const UploadCard = () => {
           onClick={handleAnalyze}
           disabled={loading}
         >
-          {loading ? "Analyzing..." : "Analyze Resume"}
+          {loading ? (
+  <span className="loading-text">
+    <span className="loader"></span>
+    Waking up server… analyzing resume
+  </span>
+) : (
+  "Analyze Resume"
+)}
+
         </button>
 
         {/* =======================
@@ -84,9 +98,23 @@ const UploadCard = () => {
         ======================= */}
         {result && (
           <div className="result">
-            <div className="score">
-              ATS Score: {result.ats_score}%
-            </div>
+            <div className="score-section">
+  <div className={`score-text ${getScoreColor(result.ats_score)}`}>
+    ATS Score: {result.ats_score}%
+  </div>
+
+  <div className="progress-bar">
+    <div
+      className={`progress-fill ${getScoreColor(result.ats_score)}`}
+      style={{ width: `${result.ats_score}%` }}
+    ></div>
+  </div>
+
+  <div className="score-hint">
+    Target score for high acceptance: <strong>65%+</strong>
+  </div>
+</div>
+
 
             <ResultGroup
               title="Matched Skills"
